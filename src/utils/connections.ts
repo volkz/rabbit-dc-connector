@@ -27,7 +27,9 @@ export class ConnectionsUtils {
     let uriQuery = `${host}`;
 
     if (authenticate) {
-      uriQuery = `${authenticate.user}:${authenticate.password}@${host}`;
+      const user = encodeURIComponent(authenticate.user);
+      const pwd = encodeURIComponent(authenticate.password);
+      uriQuery = `${user}:${pwd}@${host}`;
     }
 
     return `amqp://${uriQuery}`;
