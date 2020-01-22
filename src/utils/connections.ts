@@ -20,7 +20,9 @@ export class ConnectionsUtils {
    */
   public static generateQuery(params: Partial<IParams>) {
     const { host, authenticate } = params;
-    if (!host) throw new Error('No host provided');
+    if (!host) {
+      throw new Error('No host provided');
+    }
 
     let uriQuery = `${host}`;
 
