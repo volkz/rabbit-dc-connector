@@ -1,6 +1,6 @@
 import * as amqp from 'amqplib';
 
-interface IExchange {
+export interface IExchange {
   name: string;
   type: string;
   options: any;
@@ -13,19 +13,19 @@ export class AmqpSender {
    * @param host RabbitMQ url
    * @param exchange IExchange object for exchange configuration
    */
-  public static async connection(host: string, queue?: string, exchange?: IExchange) {
+  public static async connection(host: string, exchange?: IExchange, queue?: string) {
     try {
       const connection = await amqp.connect(`amqp://${host}`);
       AmqpSender.channel = await connection.createChannel();
 
-      if (queue) {
-        AmqpSender.queue = queue;
-        AmqpSender.setQueue(queue);
-      }
-
       if (exchange) {
         AmqpSender.exchange = exchange;
         AmqpSender.setExchange(exchange);
+      }
+
+      if (queue) {
+        AmqpSender.queue = queue;
+        AmqpSender.setQueue(queue);
       }
     } catch (error) {
       throw error;

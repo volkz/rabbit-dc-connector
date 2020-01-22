@@ -3,7 +3,7 @@ import * as amqp from 'amqplib';
 /**
  * IQueue interface
  */
-interface IQueues {
+export interface IQueues {
   name: string;
   callback: (msg: amqp.ConsumeMessage | null) => any;
   options: amqp.Options.Consume;
