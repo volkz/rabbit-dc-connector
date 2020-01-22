@@ -7,11 +7,6 @@ interface IExchange {
 }
 
 export class AmqpSender {
-  static channel: amqp.Channel;
-  static exchange: IExchange;
-  static queue: string;
-  constructor() {}
-
   /**
    * Create RabbitMQ connection
    *
@@ -33,7 +28,6 @@ export class AmqpSender {
         AmqpSender.setExchange(exchange);
       }
     } catch (error) {
-      console.log('E0', error);
       throw error;
     }
   }
@@ -73,6 +67,34 @@ export class AmqpSender {
   public static closeChannel(ch: amqp.Channel) {
     ch.close();
   }
+
+  /**
+   * Sender channel
+   *
+   * @private
+   * @static
+   * @type {amqp.Channel}
+   * @memberof AmqpSender
+   */
+  private static channel: amqp.Channel;
+  /**
+   * Received exchange  for sender
+   *
+   * @private
+   * @static
+   * @type {IExchange}
+   * @memberof AmqpSender
+   */
+  private static exchange: IExchange;
+  /**
+   * Queue string
+   *
+   * @private
+   * @static
+   * @type {string}
+   * @memberof AmqpSender
+   */
+  private static queue: string;
 
   /**
    * Set queue connection

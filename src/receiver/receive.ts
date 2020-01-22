@@ -1,5 +1,8 @@
 import * as amqp from 'amqplib';
 
+/**
+ * IQueue interface
+ */
 interface IQueues {
   name: string;
   callback: (msg: amqp.ConsumeMessage | null) => any;
@@ -7,9 +10,6 @@ interface IQueues {
 }
 
 export class AmqpReceiver {
-  static channel: amqp.Channel;
-  static queue: string;
-
   /**
    *
    * @param host RabbitMQ url
@@ -20,18 +20,37 @@ export class AmqpReceiver {
       const connection = await amqp.connect(`amqp://${host}`);
       AmqpReceiver.channel = await connection.createChannel();
     } catch (error) {
-      console.log('E0', error);
       throw error;
     }
   }
 
-  public static attachQueues(queues: Array<IQueues>) {
+  /**
+   * Attach array of queues (IQueues) to channel
+   *
+   * @param queues Array of IQueues
+   */
+  public static attachQueues(queues: IQueues[]) {
     queues.forEach((e: IQueues) => {
       AmqpReceiver.channel.consume(e.name, msg => e.callback(msg), e.options);
     });
   }
 
+  /**
+   * Close open channel
+   *
+   * @param ch
+   */
   public static closeChannel(ch: amqp.Channel) {
     ch.close();
   }
+
+  /**
+   * Receiver channel for consume
+   *
+   * @private
+   * @static
+   * @type {amqp.Channel}
+   * @memberof AmqpReceiver
+   */
+  private static channel: amqp.Channel;
 }
