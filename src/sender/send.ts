@@ -38,7 +38,7 @@ export class AmqpSender {
    * @param msg String or object message to publish
    * @param queue Queue name
    */
-  public static publishtoQueue(msg: string, queue: string) {
+  public static publishtoQueue(msg: string | any, queue: string) {
     if (typeof msg !== 'string') {
       msg = JSON.stringify(msg);
     }
