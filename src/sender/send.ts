@@ -1,5 +1,5 @@
 import * as amqp from 'amqplib';
-
+import { ConnectionsUtils, IParams } from '../utils/connections';
 export interface IExchange {
   name: string;
   type: string;
@@ -11,11 +11,14 @@ export class AmqpSender {
    * Create RabbitMQ connection
    *
    * @param host RabbitMQ url
-   * @param exchange IExchange object for exchange configuration
+   * @param params IExchange object for exchange configuration
    */
-  public static async connection(host: string, exchange?: IExchange, queue?: string) {
+  public static async connection({ ...params }: Partial<IParams>) {
     try {
-      const connection = await amqp.connect(`amqp://${host}`);
+      const uri = ConnectionsUtils.generateQuery(params);
+      const { exchange, queue } = params;
+      const connection = await amqp.connect(uri);
+
       AmqpSender.channel = await connection.createChannel();
 
       if (exchange) {
