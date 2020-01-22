@@ -51,7 +51,7 @@ export class AmqpSender {
    * @param msg string or object message
    * @param routingKey routing key for RabbitMQ exchange
    */
-  public static publishToExchange(msg: string, routingKey: string) {
+  public static publishToExchange(msg: string | any, routingKey: string) {
     if (typeof msg !== 'string') {
       msg = JSON.stringify(msg);
     }
