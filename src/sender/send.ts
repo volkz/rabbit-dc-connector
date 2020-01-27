@@ -1,5 +1,6 @@
-import { ConnectionsUtils, IParams } from '../utils/connections';
 import * as amqp from 'amqplib';
+import { ConnectionsUtils, IParams } from '../utils/connections';
+
 export interface IExchange {
   name: string;
   type: string;

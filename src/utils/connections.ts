@@ -1,5 +1,6 @@
-import { IExchange } from '../sender/send';
 import * as amqp from 'amqplib';
+import { IExchange } from '../sender/send';
+
 export interface IAuthenticate {
   user: string;
   password: string;
