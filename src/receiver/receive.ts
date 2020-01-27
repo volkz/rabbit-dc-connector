@@ -18,13 +18,13 @@ export class AmqpReceiver {
   public static async connection({ ...params }: Partial<IParams>) {
     try {
       try {
-        AmqpReceiver.current_connection = await ConnectionsUtils.generateConnection(params);
+        AmqpReceiver.CurrentConnection = await ConnectionsUtils.generateConnection(params);
       } catch (error) {
         return setTimeout(() => {
           AmqpReceiver.connection(params);
         }, 2000);
       }
-      AmqpReceiver.channel = await AmqpReceiver.current_connection.createChannel();
+      AmqpReceiver.channel = await AmqpReceiver.CurrentConnection.createChannel();
     } catch (error) {
       throw error;
     }
@@ -68,5 +68,5 @@ export class AmqpReceiver {
    * @static
    * @memberof AmqpReceiver
    */
-  private static current_connection: amqp.Connection;
+  private static CurrentConnection: amqp.Connection;
 }

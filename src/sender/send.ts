@@ -18,15 +18,14 @@ export class AmqpSender {
       const { exchange, queue } = params;
 
       try {
-        AmqpSender.current_connection = await ConnectionsUtils.generateConnection(params);
+        AmqpSender.CurrentConnection = await ConnectionsUtils.generateConnection(params);
       } catch (error) {
-        console.log(error);
         return setTimeout(() => {
           AmqpSender.connection(params);
         }, 2000);
       }
 
-      AmqpSender.channel = await AmqpSender.current_connection.createChannel();
+      AmqpSender.channel = await AmqpSender.CurrentConnection.createChannel();
 
       if (exchange) {
         AmqpSender.exchange = exchange;
@@ -114,7 +113,7 @@ export class AmqpSender {
    * @static
    * @memberof AmqpSender
    */
-  private static current_connection: amqp.Connection;
+  private static CurrentConnection: amqp.Connection;
 
   /**
    * Set queue connection
