@@ -1,5 +1,5 @@
 import { IExchange } from '../sender/send';
-
+import * as amqp from 'amqplib';
 export interface IAuthenticate {
   user: string;
   password: string;
@@ -13,6 +13,24 @@ export interface IParams {
 }
 
 export class ConnectionsUtils {
+  /**
+   * Returns amqp connection
+   *
+   * @param param0
+   */
+  public static async generateConnection({ ...params }: Partial<IParams>) {
+    try {
+      const uri = ConnectionsUtils.generateQuery(params);
+      try {
+        const connection = await amqp.connect(uri);
+        return connection;
+      } catch (error) {
+        throw error;
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
   /**
    * generate connection string
    *

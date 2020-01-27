@@ -1,5 +1,5 @@
-import * as amqp from 'amqplib';
 import { ConnectionsUtils, IParams } from '../utils/connections';
+import * as amqp from 'amqplib';
 export interface IExchange {
   name: string;
   type: string;
@@ -15,11 +15,18 @@ export class AmqpSender {
    */
   public static async connection({ ...params }: Partial<IParams>) {
     try {
-      const uri = ConnectionsUtils.generateQuery(params);
       const { exchange, queue } = params;
-      const connection = await amqp.connect(uri);
 
-      AmqpSender.channel = await connection.createChannel();
+      try {
+        AmqpSender.current_connection = await ConnectionsUtils.generateConnection(params);
+      } catch (error) {
+        console.log(error);
+        return setTimeout(() => {
+          AmqpSender.connection(params);
+        }, 2000);
+      }
+
+      AmqpSender.channel = await AmqpSender.current_connection.createChannel();
 
       if (exchange) {
         AmqpSender.exchange = exchange;
@@ -98,6 +105,16 @@ export class AmqpSender {
    * @memberof AmqpSender
    */
   private static queue: string;
+
+  /**
+   *
+   * Amqp connection
+   *
+   * @private
+   * @static
+   * @memberof AmqpSender
+   */
+  private static current_connection: amqp.Connection;
 
   /**
    * Set queue connection
