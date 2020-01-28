@@ -36,6 +36,11 @@ export class AmqpReceiver {
    * @param queues Array of IQueues
    */
   public static attachQueues(queues: IQueues[]) {
+    if (!AmqpReceiver.channel) {
+      return setTimeout(() => {
+        AmqpReceiver.attachQueues(queues);
+      }, 2000);
+    }
     queues.forEach((e: IQueues) => {
       AmqpReceiver.channel.consume(e.name, msg => e.callback(msg), e.options);
     });
