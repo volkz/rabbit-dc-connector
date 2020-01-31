@@ -57,26 +57,6 @@ export class AmqpReceiver {
   }
 
   /**
-   * Execute callback for consume
-   *
-   * @param cb
-   */
-  private static executeCallbacks(cb: IQueues['callback'], msg: any, options: IQueues['options']) {
-    cb(msg);
-    if (!options.noAck) {
-      AmqpReceiver.ackMessage(msg);
-    }
-  }
-
-  private static ackMessage(msg: any) {
-    if (msg) {
-      let secs = msg.content.toString().split('.').length - 1;
-      setTimeout(() => {
-        AmqpReceiver.channel.ack(msg);
-      }, secs * 1000);
-    }
-  }
-  /**
    * Receiver channel for consume
    *
    * @private
@@ -95,4 +75,30 @@ export class AmqpReceiver {
    * @memberof AmqpReceiver
    */
   private static CurrentConnection: amqp.Connection;
+
+  /**
+   * Execute callback for consume
+   *
+   * @param cb
+   */
+  private static executeCallbacks(cb: IQueues['callback'], msg: any, options: IQueues['options']) {
+    cb(msg);
+    if (!options.noAck) {
+      AmqpReceiver.ackMessage(msg);
+    }
+  }
+
+  /**
+   * Ack message for specified channel
+   *
+   * @param msg
+   */
+  private static ackMessage(msg: any) {
+    if (msg) {
+      const secs = msg.content.toString().split('.').length - 1;
+      setTimeout(() => {
+        AmqpReceiver.channel.ack(msg);
+      }, secs * 1000);
+    }
+  }
 }
