@@ -25,6 +25,7 @@ export class AmqpReceiver {
         }, 2000);
       }
       AmqpReceiver.channel = await AmqpReceiver.CurrentConnection.createChannel();
+      AmqpReceiver.channel.prefetch(1);
     } catch (error) {
       throw error;
     }
@@ -42,7 +43,7 @@ export class AmqpReceiver {
       }, 2000);
     }
     queues.forEach((e: IQueues) => {
-      AmqpReceiver.channel.consume(e.name, msg => e.callback(msg), e.options);
+      AmqpReceiver.channel.consume(e.name, msg => AmqpReceiver.executeCallbacks(e.callback, msg, e.options), e.options);
     });
   }
 
@@ -55,6 +56,26 @@ export class AmqpReceiver {
     ch.close();
   }
 
+  /**
+   * Execute callback for consume
+   *
+   * @param cb
+   */
+  private static executeCallbacks(cb: IQueues['callback'], msg: any, options: IQueues['options']) {
+    cb(msg);
+    if (!options.noAck) {
+      AmqpReceiver.ackMessage(msg);
+    }
+  }
+
+  private static ackMessage(msg: any) {
+    if (msg) {
+      let secs = msg.content.toString().split('.').length - 1;
+      setTimeout(() => {
+        AmqpReceiver.channel.ack(msg);
+      }, secs * 1000);
+    }
+  }
   /**
    * Receiver channel for consume
    *
