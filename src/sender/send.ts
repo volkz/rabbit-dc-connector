@@ -20,19 +20,23 @@ export class AmqpSender {
    */
   public static async connection(host: string, queue?: string, exchange?: IExchange) {
     try {
+      //Connection to host and create new channel
       const connection = await amqp.connect(`amqp://${host}`);
       AmqpSender.channel = await connection.createChannel();
 
+      /** Create a new queue and assing it  to class  variable if we receive one */
       if (queue) {
         AmqpSender.queue = queue;
         AmqpSender.setQueue(queue);
       }
 
+      /** Create a new exchange and assing it to class variable if we receive one*/
       if (exchange) {
         AmqpSender.exchange = exchange;
         AmqpSender.setExchange(exchange);
       }
     } catch (error) {
+      /** Throw custom error code */
       console.log('E0', error);
       throw error;
     }
@@ -45,6 +49,7 @@ export class AmqpSender {
    * @param queue Queue name
    */
   public static publishtoQueue(msg: string, queue: string) {
+    /** Check message type for string */
     if (typeof msg !== 'string') {
       msg = JSON.stringify(msg);
     }
@@ -61,12 +66,12 @@ export class AmqpSender {
     if (typeof msg !== 'string') {
       msg = JSON.stringify(msg);
     }
-
+    /** Publish message with received parameters */
     AmqpSender.channel.publish(AmqpSender.exchange.name, `${routingKey}`, Buffer.from(msg));
   }
 
   /**
-   * Close channel
+   * Close amqp channel
    *
    * @param ch Amqp Channel
    */
