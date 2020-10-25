@@ -22,7 +22,7 @@ export class AmqpSender {
         /** Generate new connection */
         AmqpSender.CurrentConnection = await ConnectionsUtils.generateConnection(params);
       } catch (error) {
-        /** If some error occurs retry de connection after 2 seconds with the same connection **/
+        /* If some error occurs retry de connection after 2 seconds with the same connection */
         return setTimeout(() => {
           AmqpSender.connection(params);
         }, 2000);
@@ -44,7 +44,6 @@ export class AmqpSender {
       }
     } catch (error) {
       /** Throw custom error log */
-      console.log('E1', error);
       throw error;
     }
   }

@@ -21,18 +21,18 @@ export class AmqpReceiver {
         /** Generate new connection */
         AmqpReceiver.CurrentConnection = await ConnectionsUtils.generateConnection(params);
       } catch (error) {
-        /** If some error occurs retry de connection after 2 seconds with the same connection **/
+        /*If some error occurs retry de connection after 2 seconds with the same connection */
+
         return setTimeout(() => {
           AmqpReceiver.connection(params);
         }, 2000);
       }
-      /** Create a new channel attached to the new connection */
+      /*Create a new channel attached to the new connection */
       AmqpReceiver.channel = await AmqpReceiver.CurrentConnection.createChannel();
       /** limit the number of unacknowledged messages to 1 */
       AmqpReceiver.channel.prefetch(1);
     } catch (error) {
       /** Throw custom error log */
-      console.log('E0', error);
       throw error;
     }
   }
