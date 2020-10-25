@@ -19,20 +19,25 @@ export class AmqpSender {
       const { exchange, queue } = params;
 
       try {
+        /** Generate new connections */
         AmqpSender.CurrentConnection = await ConnectionsUtils.generateConnection(params);
       } catch (error) {
+        /** If some error occurs retry de connection after 2 seconds with the same connection **/
         return setTimeout(() => {
           AmqpSender.connection(params);
         }, 2000);
       }
 
+      /** Create a new channel attached to the new connection */
       AmqpSender.channel = await AmqpSender.CurrentConnection.createChannel();
 
+      /** Set exchange to the channel */
       if (exchange) {
         AmqpSender.exchange = exchange;
         AmqpSender.setExchange(exchange);
       }
 
+      /** Set queue to the channel */
       if (queue) {
         AmqpSender.queue = queue;
         AmqpSender.setQueue(queue);

@@ -21,8 +21,10 @@ export class ConnectionsUtils {
    */
   public static async generateConnection({ ...params }: Partial<IParams>) {
     try {
+      /** Set utils with generated params */
       const uri = ConnectionsUtils.generateQuery(params);
       try {
+        /** Define a new connection with previous uri */
         const connection = await amqp.connect(uri);
         return connection;
       } catch (error) {
@@ -38,19 +40,24 @@ export class ConnectionsUtils {
    * @param params IParams object with options for connection
    */
   public static generateQuery(params: Partial<IParams>) {
+    /** Retrieve host and authenticate data from params */
     const { host, authenticate } = params;
+    /** Throw error if can't find valid host */
     if (!host) {
       throw new Error('No host provided');
     }
 
     let uriQuery = `${host}`;
 
+    /** If we receive an authentication */
     if (authenticate) {
+      /** Encode both params and generate uri query for login */
       const user = encodeURIComponent(authenticate.user);
       const pwd = encodeURIComponent(authenticate.password);
       uriQuery = `${user}:${pwd}@${host}`;
     }
 
+    /** Return mounted URL from params */
     return `amqp://${uriQuery}`;
   }
 }
