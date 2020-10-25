@@ -19,7 +19,7 @@ export class AmqpSender {
       const { exchange, queue } = params;
 
       try {
-        /** Generate new connections */
+        /** Generate new connection */
         AmqpSender.CurrentConnection = await ConnectionsUtils.generateConnection(params);
       } catch (error) {
         /** If some error occurs retry de connection after 2 seconds with the same connection **/
@@ -43,6 +43,8 @@ export class AmqpSender {
         AmqpSender.setQueue(queue);
       }
     } catch (error) {
+      /** Throw custom error log */
+      console.log('E1', error);
       throw error;
     }
   }

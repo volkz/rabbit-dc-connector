@@ -31,6 +31,8 @@ export class ConnectionsUtils {
         throw error;
       }
     } catch (error) {
+      /** Throw custom error log */
+      console.log('E2', error);
       throw error;
     }
   }
