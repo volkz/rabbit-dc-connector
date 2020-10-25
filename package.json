@@ -1,11 +1,10 @@
 {
   "name": "rabbit-dc-connector",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Amqp connector for Rabbitmq",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json",
@@ -37,6 +36,7 @@
   },
   "dependencies": {
     "@types/amqplib": "^0.5.13",
+    "@types/node": "^13.1.8",
     "amqplib": "^0.5.5"
   }
 }

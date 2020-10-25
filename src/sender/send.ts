@@ -1,43 +1,49 @@
 import * as amqp from 'amqplib';
+import { ConnectionsUtils, IParams } from '../utils/connections';
 
-interface IExchange {
+export interface IExchange {
   name: string;
   type: string;
   options: any;
 }
 
 export class AmqpSender {
-  static channel: amqp.Channel;
-  static exchange: IExchange;
-  static queue: string;
-  constructor() {}
-
   /**
    * Create RabbitMQ connection
    *
    * @param host RabbitMQ url
-   * @param exchange IExchange object for exchange configuration
+   * @param params IExchange object for exchange configuration
    */
-  public static async connection(host: string, queue?: string, exchange?: IExchange) {
+  public static async connection({ ...params }: Partial<IParams>) {
     try {
-      //Connection to host and create new channel
-      const connection = await amqp.connect(`amqp://${host}`);
-      AmqpSender.channel = await connection.createChannel();
+      const { exchange, queue } = params;
 
-      /** Create a new queue and assing it  to class  variable if we receive one */
-      if (queue) {
-        AmqpSender.queue = queue;
-        AmqpSender.setQueue(queue);
+      try {
+        /** Generate new connection */
+        AmqpSender.CurrentConnection = await ConnectionsUtils.generateConnection(params);
+      } catch (error) {
+        /* If some error occurs retry de connection after 2 seconds with the same connection */
+        return setTimeout(() => {
+          AmqpSender.connection(params);
+        }, 2000);
       }
 
-      /** Create a new exchange and assing it to class variable if we receive one*/
+      /** Create a new channel attached to the new connection */
+      AmqpSender.channel = await AmqpSender.CurrentConnection.createChannel();
+
+      /** Set exchange to the channel */
       if (exchange) {
         AmqpSender.exchange = exchange;
         AmqpSender.setExchange(exchange);
       }
+
+      /** Set queue to the channel */
+      if (queue) {
+        AmqpSender.queue = queue;
+        AmqpSender.setQueue(queue);
+      }
     } catch (error) {
-      /** Throw custom error code */
-      console.log('E0', error);
+      /** Throw custom error log */
       throw error;
     }
   }
@@ -62,7 +68,7 @@ export class AmqpSender {
    * @param msg string or object message
    * @param routingKey routing key for RabbitMQ exchange
    */
-  public static publishToExchange(msg: string, routingKey: string) {
+  public static publishToExchange(msg: string | any, routingKey: string) {
     if (typeof msg !== 'string') {
       msg = JSON.stringify(msg);
     }
@@ -78,6 +84,44 @@ export class AmqpSender {
   public static closeChannel(ch: amqp.Channel) {
     ch.close();
   }
+
+  /**
+   * Sender channel
+   *
+   * @private
+   * @static
+   * @type {amqp.Channel}
+   * @memberof AmqpSender
+   */
+  private static channel: amqp.Channel;
+  /**
+   * Received exchange  for sender
+   *
+   * @private
+   * @static
+   * @type {IExchange}
+   * @memberof AmqpSender
+   */
+  private static exchange: IExchange;
+  /**
+   * Queue string
+   *
+   * @private
+   * @static
+   * @type {string}
+   * @memberof AmqpSender
+   */
+  private static queue: string;
+
+  /**
+   *
+   * Amqp connection
+   *
+   * @private
+   * @static
+   * @memberof AmqpSender
+   */
+  private static CurrentConnection: amqp.Connection;
 
   /**
    * Set queue connection

@@ -1,57 +1,110 @@
 import * as amqp from 'amqplib';
-
-interface IQueues {
+import { ConnectionsUtils, IParams } from '../utils/connections';
+/**
+ * IQueue interface
+ */
+export interface IQueues {
   name: string;
   callback: (msg: amqp.ConsumeMessage | null) => any;
   options: amqp.Options.Consume;
 }
 
 export class AmqpReceiver {
-  /** Static class variables */
-  static channel: amqp.Channel;
-  static queue: string;
-
   /**
    * Function for establish connection with the eventbus
    *
-   * @param host RabbitMQ url
-   * @param exchange IExchange object for exchange configuration
+   * @param {params} Object Based on IQueues interface
    */
-  public static async connection(host: string) {
+  public static async connection({ ...params }: Partial<IParams>) {
     try {
-      /** Create connection with amqp client */
-      const connection = await amqp.connect(`amqp://${host}`);
-      /**Create new channel with connection */
-      AmqpReceiver.channel = await connection.createChannel();
+      try {
+        /** Generate new connection */
+        AmqpReceiver.CurrentConnection = await ConnectionsUtils.generateConnection(params);
+      } catch (error) {
+        /*If some error occurs retry de connection after 2 seconds with the same connection */
+
+        return setTimeout(() => {
+          AmqpReceiver.connection(params);
+        }, 2000);
+      }
+      /*Create a new channel attached to the new connection */
+      AmqpReceiver.channel = await AmqpReceiver.CurrentConnection.createChannel();
+      /** limit the number of unacknowledged messages to 1 */
+      AmqpReceiver.channel.prefetch(1);
     } catch (error) {
-      /** Throw custom error code */
-      console.log('E0', error);
+      /** Throw custom error log */
       throw error;
     }
   }
 
   /**
-   * Function for attaching queues to amqp channel
+   * Attach array of queues (IQueues) to channel
    *
-   * @param queues Array of queues to attach to channel
-   *
-   * @property name : Name of queue
-   * @property callback : Function for execute with the message
-   * @property options : Options for the consumer
+   * @param queues Array of IQueues
    */
-  public static attachQueues(queues: Array<IQueues>) {
-    /** Loop queues to attach */
+  public static attachQueues(queues: IQueues[]) {
+    if (!AmqpReceiver.channel) {
+      return setTimeout(() => {
+        AmqpReceiver.attachQueues(queues);
+      }, 2000);
+    }
     queues.forEach((e: IQueues) => {
-      AmqpReceiver.channel.consume(e.name, msg => e.callback(msg), e.options);
+      AmqpReceiver.channel.consume(e.name, msg => AmqpReceiver.executeCallbacks(e.callback, msg, e.options), e.options);
     });
   }
 
   /**
-   * Closes channel connection
+   * Close open channel
    *
    * @param ch
    */
   public static closeChannel(ch: amqp.Channel) {
     ch.close();
+  }
+
+  /**
+   * Receiver channel for consume
+   *
+   * @private
+   * @static
+   * @type {amqp.Channel}
+   * @memberof AmqpReceiver
+   */
+  private static channel: amqp.Channel;
+
+  /**
+   *
+   * Amqp connection
+   *
+   * @private
+   * @static
+   * @memberof AmqpReceiver
+   */
+  private static CurrentConnection: amqp.Connection;
+
+  /**
+   * Execute callback for consume
+   *
+   * @param cb
+   */
+  private static executeCallbacks(cb: IQueues['callback'], msg: any, options: IQueues['options']) {
+    cb(msg);
+    if (!options.noAck) {
+      AmqpReceiver.ackMessage(msg);
+    }
+  }
+
+  /**
+   * Ack message for specified channel
+   *
+   * @param msg
+   */
+  private static ackMessage(msg: any) {
+    if (msg) {
+      const secs = msg.content.toString().split('.').length - 1;
+      setTimeout(() => {
+        AmqpReceiver.channel.ack(msg);
+      }, secs * 1000);
+    }
   }
 }
