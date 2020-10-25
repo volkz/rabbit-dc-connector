@@ -13,8 +13,7 @@ export class AmqpReceiver {
   /**
    * Function for establish connection with the eventbus
    *
-   * @param host RabbitMQ url
-   * @param exchange IExchange object for exchange configuration
+   * @param {params} Object Based on IQueues interface
    */
   public static async connection({ ...params }: Partial<IParams>) {
     try {
