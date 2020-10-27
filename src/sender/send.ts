@@ -3,7 +3,7 @@ import { ConnectionsUtils, IParams } from '../utils/connections';
 
 export interface IExchange {
   name: string;
-  type: string;
+  type: '' | 'match' | 'direct' | 'headers' | 'topic' | 'fanout';
   options: any;
 }
 
