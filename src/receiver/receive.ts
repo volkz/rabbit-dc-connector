@@ -49,7 +49,11 @@ export class AmqpReceiver {
       }, 2000);
     }
     queues.forEach((e: IQueues) => {
-      AmqpReceiver.channel.consume(e.name, msg => AmqpReceiver.executeCallbacks(e.callback, msg, e.options), e.options);
+      AmqpReceiver.channel.consume(
+        e.name,
+        (msg) => AmqpReceiver.executeCallbacks(e.callback, msg, e.options),
+        e.options,
+      );
     });
   }
 
