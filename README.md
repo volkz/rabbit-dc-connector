@@ -14,4 +14,4 @@ npm i --save rabbit-dc-connector
 
 # Contact
 
-If you want to contact me you can reach me at delacruzd93@gmail.com.
+If you want to contact me you can reach me at packages.dc@gmail.com.
