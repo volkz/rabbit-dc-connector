@@ -53,11 +53,7 @@ export class AmqpReceiver {
         e.name,
         (msg: any) => {
           AmqpReceiver.executeCallbacks(e.callback, msg, e.options);
-
-          setTimeout(function () {
-            console.log(' [x] Done');
-            AmqpReceiver.channel.ack(msg);
-          }, 10 * 1000);
+          AmqpReceiver.channel.ack(msg);
         },
         e.options,
       );
