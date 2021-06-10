@@ -51,13 +51,13 @@ export class AmqpReceiver {
     queues.forEach((e: IQueues) => {
       AmqpReceiver.channel.consume(
         e.name,
-        (msg:any) => {
+        (msg: any) => {
           const secs = msg.content.toString().split('.').length - 1 || 9000;
-          console.log(" [x] Received %s", msg.content.toString());
+          console.log(' [x] Received %s', msg.content.toString());
           AmqpReceiver.executeCallbacks(e.callback, msg, e.options);
 
-          setTimeout(function() {
-            console.log(" [x] Done");
+          setTimeout(function () {
+            console.log(' [x] Done');
             AmqpReceiver.channel.ack(msg);
           }, secs * 1000);
         },
