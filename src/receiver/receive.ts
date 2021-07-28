@@ -6,7 +6,7 @@ import { ConnectionsUtils, IParams } from '../utils/connections';
 export interface IQueues {
   name: string;
   callback: (msg: amqp.ConsumeMessage | null) => any;
-  options: amqp.Options.Consume;
+  options: amqp.Options.AssertQueue;
 }
 
 export class AmqpReceiver {
@@ -18,8 +18,9 @@ export class AmqpReceiver {
   public static async connection({ ...params }: Partial<IParams>) {
     try {
       try {
-        /** Generate new connection */
-        AmqpReceiver.CurrentConnection = await ConnectionsUtils.generateConnection(params);
+        /** Generate new connection if not exist*/
+        if (!AmqpReceiver.CurrentConnection)
+          AmqpReceiver.CurrentConnection = await ConnectionsUtils.generateConnection(params);
       } catch (error) {
         /*If some error occurs retry de connection after 2 seconds with the same connection */
 
@@ -28,7 +29,7 @@ export class AmqpReceiver {
         }, 2000);
       }
       /*Create a new channel attached to the new connection */
-      AmqpReceiver.channel = await AmqpReceiver.CurrentConnection.createChannel();
+      if (!AmqpReceiver.channel) AmqpReceiver.channel = await AmqpReceiver.CurrentConnection.createChannel();
       /** limit the number of unacknowledged messages to 1 */
       AmqpReceiver.channel.prefetch(1);
     } catch (error) {
@@ -49,7 +50,11 @@ export class AmqpReceiver {
       }, 2000);
     }
     queues.forEach((e: IQueues) => {
-      AmqpReceiver.channel.consume(e.name, msg => AmqpReceiver.executeCallbacks(e.callback, msg, e.options), e.options);
+      AmqpReceiver.channel.consume(
+        e.name,
+        (msg) => AmqpReceiver.executeCallbacks(e.callback, msg, e.options),
+        e.options,
+      );
     });
   }
 
@@ -99,7 +104,7 @@ export class AmqpReceiver {
    *
    * @param msg
    */
-  private static ackMessage(msg: any) {
+  private static ackMessage(msg: amqp.Message) {
     if (msg) {
       const secs = msg.content.toString().split('.').length - 1;
       setTimeout(() => {
