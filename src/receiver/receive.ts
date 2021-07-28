@@ -6,7 +6,7 @@ import { ConnectionsUtils, IParams } from '../utils/connections';
 export interface IQueues {
   name: string;
   callback: (msg: amqp.ConsumeMessage | null) => any;
-  options: amqp.Options.AssertQueue;
+  options: amqp.Options.Consume;
 }
 
 export class AmqpReceiver {
@@ -32,10 +32,8 @@ export class AmqpReceiver {
       }
 
       /*Create a new channel attached to the new connection */
-
-      AmqpReceiver.CurrentConnection = await ConnectionsUtils.generateConnection(params);
+      AmqpReceiver.channel = await AmqpReceiver.CurrentConnection.createChannel();
       /** limit the number of unacknowledged messages to 1 */
-
       AmqpReceiver.channel.prefetch(1);
     } catch (error) {
       /** Throw custom error log */

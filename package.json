@@ -1,6 +1,6 @@
 {
   "name": "rabbit-dc-connector",
-  "version": "1.1.11",
+  "version": "1.1.12",
   "description": "Amqp connector for Rabbitmq",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
