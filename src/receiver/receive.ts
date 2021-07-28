@@ -22,7 +22,6 @@ export class AmqpReceiver {
 
         AmqpReceiver.CurrentConnection = await ConnectionsUtils.generateConnection(params);
       } catch (error) {
-        console.log(error);
         /*If some error occurs retry de connection after 2 seconds with the same connection */
 
         return setTimeout(() => {
