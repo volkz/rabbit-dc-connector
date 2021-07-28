@@ -32,6 +32,7 @@ export class AmqpReceiver {
         /*If some error occurs retry de connection after 2 seconds with the same connection */
 
         return setTimeout(() => {
+          if (AmqpReceiver.CurrentConnection) AmqpReceiver.CurrentConnection.close();
           AmqpReceiver.connection(params);
         }, 2000);
       }

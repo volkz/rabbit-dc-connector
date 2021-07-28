@@ -19,13 +19,13 @@ export class ConnectionsUtils {
    *
    * @param param0
    */
-  public static async generateConnection({ ...params }: Partial<IParams>) {
+  public static async generateConnection({ ...params }: Partial<IParams>): Promise<amqp.Connection> {
     try {
       /** Set utils with generated params */
       const uri = ConnectionsUtils.generateQuery(params);
       try {
         /** Define a new connection with previous uri */
-        const connection = await amqp.connect(uri);
+        const connection: amqp.Connection = await amqp.connect(uri);
         return connection;
       } catch (error) {
         throw error;
