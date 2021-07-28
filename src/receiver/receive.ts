@@ -6,7 +6,7 @@ import { ConnectionsUtils, IParams } from '../utils/connections';
 export interface IQueues {
   name: string;
   callback: (msg: amqp.ConsumeMessage | null) => any;
-  options: amqp.Options.Consume;
+  options: amqp.Options.AssertQueue;
 }
 
 export class AmqpReceiver {
@@ -19,7 +19,8 @@ export class AmqpReceiver {
     try {
       try {
         /** Generate new connection */
-        AmqpReceiver.CurrentConnection = await ConnectionsUtils.generateConnection(params);
+        if (!AmqpReceiver.CurrentConnection)
+          AmqpReceiver.CurrentConnection = await ConnectionsUtils.generateConnection(params);
       } catch (error) {
         /*If some error occurs retry de connection after 2 seconds with the same connection */
 
@@ -28,7 +29,8 @@ export class AmqpReceiver {
         }, 2000);
       }
       /*Create a new channel attached to the new connection */
-      AmqpReceiver.channel = await AmqpReceiver.CurrentConnection.createChannel();
+      if (!AmqpReceiver.CurrentConnection)
+        AmqpReceiver.CurrentConnection = await ConnectionsUtils.generateConnection(params);
       /** limit the number of unacknowledged messages to 1 */
       AmqpReceiver.channel.prefetch(1);
     } catch (error) {
@@ -53,11 +55,6 @@ export class AmqpReceiver {
         e.name,
         (msg: any) => {
           AmqpReceiver.executeCallbacks(e.callback, msg, e.options);
-
-          setTimeout(function () {
-            console.log(' [x] Done');
-            AmqpReceiver.channel.ack(msg);
-          }, 10 * 1000);
         },
         e.options,
       );
@@ -98,7 +95,7 @@ export class AmqpReceiver {
    *
    * @param cb
    */
-  private static executeCallbacks(cb: IQueues['callback'], msg: any, options: IQueues['options']) {
+  private static executeCallbacks(cb: IQueues['callback'], msg: any, options: any) {
     cb(msg);
     if (!options.noAck) {
       AmqpReceiver.ackMessage(msg);
@@ -112,10 +109,10 @@ export class AmqpReceiver {
    */
   private static ackMessage(msg: any) {
     if (msg) {
-      const secs = msg.content.toString().split('.').length - 1;
-      setTimeout(() => {
+      setTimeout(function () {
+        console.log(' [x] Done');
         AmqpReceiver.channel.ack(msg);
-      }, secs * 1000);
+      }, 10 * 1000);
     }
   }
 }
