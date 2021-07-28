@@ -21,13 +21,6 @@ export class AmqpReceiver {
         /** Generate new connection */
 
         AmqpReceiver.CurrentConnection = await ConnectionsUtils.generateConnection(params);
-
-        /*Create a new channel attached to the new connection */
-
-        AmqpReceiver.CurrentConnection = await ConnectionsUtils.generateConnection(params);
-        /** limit the number of unacknowledged messages to 1 */
-
-        // AmqpReceiver.channel.prefetch(1);
       } catch (error) {
         console.log(error);
         /*If some error occurs retry de connection after 2 seconds with the same connection */
@@ -38,6 +31,13 @@ export class AmqpReceiver {
           }
         }, 2000);
       }
+
+      /*Create a new channel attached to the new connection */
+
+      AmqpReceiver.CurrentConnection = await ConnectionsUtils.generateConnection(params);
+      /** limit the number of unacknowledged messages to 1 */
+
+      AmqpReceiver.channel.prefetch(1);
     } catch (error) {
       /** Throw custom error log */
       throw error;
