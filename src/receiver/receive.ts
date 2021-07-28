@@ -92,7 +92,7 @@ export class AmqpReceiver {
    *
    * @param cb
    */
-  private static executeCallbacks(cb: IQueues['callback'], msg: any, options: IQueues['options']) {
+  private static executeCallbacks(cb: IQueues['callback'], msg: any, options: any) {
     cb(msg);
     if (!options.noAck) {
       AmqpReceiver.ackMessage(msg);
